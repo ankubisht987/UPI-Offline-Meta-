@@ -10,6 +10,54 @@ import jakarta.persistence.PrePersist;
 import jakarta.persistence.Table;
 import jakarta.persistence.Version;
 
+
+/**
+ * Account represents a user's bank/wallet account inside the system.
+ *
+ * Each account is identified using a VPA (Virtual Payment Address),
+ * similar to real UPI IDs like:
+ *
+ *    ankush@bank
+ *    user@upi
+ *
+ * This entity is stored in the database using JPA/Hibernate.
+ *
+ * Main responsibilities:
+ * - Store account holder information
+ * - Store current account balance
+ * - Support safe balance updates during transactions
+ * - Keep track of account creation time
+ *
+ * Important Fields:
+ *
+ * - vpa:
+ *     Unique UPI-style address used as the account ID.
+ *
+ * - holderName:
+ *     Name of the account owner.
+ *
+ * - balance:
+ *     Current money available in the account.
+ *     BigDecimal is used instead of double to avoid money calculation errors.
+ *
+ * - version:
+ *     Used for optimistic locking.
+ *     Helps prevent two transactions from updating the same account balance
+ *     at the same time and causing incorrect results.
+ *
+ * - createdAt:
+ *     Timestamp showing when the account was created.
+ *
+ * Lifecycle:
+ * - @PrePersist automatically sets createdAt before saving
+ *   the account for the first time.
+ *
+ * Database Notes:
+ * - This class is mapped to the "accounts" table.
+ * - JPA/Hibernate automatically converts this object into a database row.
+ */
+
+
 @Entity
 @Table(name = "accounts")
 public class Account {
