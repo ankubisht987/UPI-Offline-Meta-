@@ -115,19 +115,19 @@ class UpiOfflineMetaApplicationTests {
 		assertTrue(idem.isSeen("abc"));
 	}
 
-	// @Test
-	// void duplicatePacketIsRejected() {
-	// idem.clear();
+	@Test
+	void duplicatePacketIsRejected() {
+		idem.clear();
 
-	// // first time -> allowed
-	// assertTrue(idem.claim("fingerprint-123"));
+		// first time -> allowed
+		assertTrue(idem.claim("fingerprint-123"));
 
-	// // second time, same fingerprint -> duplicate
-	// assertFalse(idem.claim("fingerprint-123"));
+		// second time, same fingerprint -> duplicate
+		assertFalse(idem.claim("fingerprint-123"));
 
-	// // a different packet is fine
-	// assertTrue(idem.claim("fingerprint-456"));
-	// }
+		// a different packet is fine
+		assertTrue(idem.claim("fingerprint-456"));
+	}
 
 	@Test
 	void samePaymentIsOnlyClaimedOnce() throws Exception {
