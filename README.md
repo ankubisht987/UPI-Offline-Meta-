@@ -1,4 +1,4 @@
-# UPI Offline Mesh
+# UPI Offline Bridge
 
 A proof-of-concept for **offline UPI-like payments** using a store-and-forward mesh network. Devices pass tamper-proof, encrypted payment packets over Bluetooth/Wi-Fi Direct without internet, and a bridge device uploads them to the bank server when connectivity is available.
 
@@ -29,7 +29,7 @@ A proof-of-concept for **offline UPI-like payments** using a store-and-forward m
 
 ## Overview
 
-`UPI Offline Mesh` demonstrates how digital payments can work in low-connectivity or no-connectivity areas (rural zones, network outages, underground metros, etc.).
+`UPI Offline Bridge` demonstrates how digital payments can work in low-connectivity or no-connectivity areas (rural zones, network outages, underground metros, etc.).
 
 Instead of requiring both sender and receiver to be online, payments are encrypted on the sender's device and hop between nearby devices until they reach a device with internet access. That "bridge" device securely delivers the sealed packet to the server, which verifies, deduplicates and settles it atomically.
 
