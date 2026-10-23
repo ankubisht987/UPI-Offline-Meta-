@@ -403,53 +403,50 @@
 // "money must not move a second time");
 // }
 
-// // @Test
-// // void simultaneousDeliveriesSettleExactlyOnce() throws Exception {
-// // idem.clear();
+// @Test
+// void simultaneousDeliveriesSettleExactlyOnce() throws Exception {
+// idem.clear();
 
-// // var ankush = accountRepo.findById("ankush@bank").orElseThrow();
-// // ankush.setBalance(new BigDecimal("5000.00"));
-// // accountRepo.save(ankush);
+// var ankush = accountRepo.findById("ankush@bank").orElseThrow();
+// ankush.setBalance(new BigDecimal("5000.00"));
+// accountRepo.save(ankush);
 
-// // var bob = accountRepo.findById("bob@bank").orElseThrow();
-// // bob.setBalance(new BigDecimal("1000.00"));
-// // accountRepo.save(bob);
+// var bob = accountRepo.findById("bob@bank").orElseThrow();
+// bob.setBalance(new BigDecimal("1000.00"));
+// accountRepo.save(bob);
 
-// // MeshPacket packet = demo.createPacket("ankush@bank", "bob@bank", new
-// // BigDecimal("100.00"), "1234", 5);
+// MeshPacket packet = demo.createPacket("ankush@bank", "bob@bank", new
+// BigDecimal("100.00"), "1234", 5);
 
-// // int N = 25;
-// // ExecutorService pool = Executors.newFixedThreadPool(N);
-// // CountDownLatch start = new CountDownLatch(1);
-// // List<Future<IngestResult>> futures = new ArrayList<>();
+// int N = 25;
+// ExecutorService pool = Executors.newFixedThreadPool(N);
+// CountDownLatch start = new CountDownLatch(1);
+// List<Future<IngestResult>> futures = new ArrayList<>();
 
-// // for (int i = 0; i < N; i++) {
-// // futures.add(pool.submit(() -> {
-// // start.await();
-// // return ingestion.ingest(packet, "bridge-node", 1);
-// // }));
-// // }
+// for (int i = 0; i < N; i++) {
+// futures.add(pool.submit(() -> {
+// start.await();
+// return ingestion.ingest(packet, "bridge-node", 1);
+// }));
+// }
 
-// // start.countDown();
+// start.countDown();
 
-// // Map<String, Long> outcomes = new HashMap<>();
-// // for (Future<IngestResult> f : futures) {
-// // IngestResult r = f.get(15, TimeUnit.SECONDS);
-// // outcomes.merge(r.outcome(), 1L, Long::sum);
-// // }
-// // pool.shutdown();
+// Map<String, Long> outcomes = new HashMap<>();
+// for (Future<IngestResult> f : futures) {
+// IngestResult r = f.get(15, TimeUnit.SECONDS);
+// outcomes.merge(r.outcome(), 1L, Long::sum);
+// }
+// pool.shutdown();
 
-// // assertEquals(1L, outcomes.getOrDefault("SETTLED", 0L), "exactly one
-// delivery
-// // may settle");
-// // assertEquals((long) (N - 1), outcomes.getOrDefault("DUPLICATE_DROPPED",
-// 0L),
-// // "all others must be duplicates");
+// assertEquals(1L, outcomes.getOrDefault("SETTLED", 0L), "exactly one delivery
+// may settle");
+// assertEquals((long) (N - 1), outcomes.getOrDefault("DUPLICATE_DROPPED",0L),
+// "all others must be duplicates");
 
-// // assertEquals(0, new BigDecimal("4900.00")
-// //
+// assertEquals(0, new BigDecimal("4900.00")
 // .compareTo(accountRepo.findById("ankush@bank").orElseThrow().getBalance()));
-// // assertEquals(0, new BigDecimal("1100.00")
-// // .compareTo(accountRepo.findById("bob@bank").orElseThrow().getBalance()));
-// // }
+// assertEquals(0, new BigDecimal("1100.00")
+// .compareTo(accountRepo.findById("bob@bank").orElseThrow().getBalance()));
+// }
 // }
