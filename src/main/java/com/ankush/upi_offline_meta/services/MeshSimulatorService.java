@@ -32,11 +32,10 @@ public class MeshSimulatorService {
 
     public void resetMesh() {
         // First time: create all devices with no bridge set
-        if (devices.isEmpty()) {
-            List<String> ids = Arrays.asList("phone-ankush", "phone-bob", "phone-carol", "phone-dave", "bridge-node");
-            for (String id : ids) {
-                devices.put(id, new VirtualDevice(id, false));
-            }
+        devices.clear();
+        List<String> ids = Arrays.asList("phone-ankush", "phone-bob", "phone-carol", "phone-dave", "bridge-node");
+        for (String id : ids) {
+            devices.put(id, new VirtualDevice(id, false));
         }
         rotateBridge();
     }
