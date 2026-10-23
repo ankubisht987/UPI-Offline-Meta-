@@ -8,7 +8,7 @@ import com.ankush.upi_offline_meta.model.MeshPacket;
 
 public class VirtualDevice {
     public final String deviceId;
-    private final boolean hasInternet;
+    private boolean hasInternet; // no longer final
     private final Map<String, MeshPacket> inbox = new LinkedHashMap<>();
 
     VirtualDevice(String deviceId, boolean hasInternet) {
@@ -24,12 +24,16 @@ public class VirtualDevice {
         return hasInternet;
     }
 
+    public void setHasInternet(boolean hasInternet) {
+        this.hasInternet = hasInternet;
+    }
+
     public void receive(MeshPacket p) {
         inbox.put(p.getPacketId(), p);
     }
 
     public boolean has(String packetId) {
-        return inbox.containsKey((packetId));
+        return inbox.containsKey(packetId);
     }
 
     public Collection<MeshPacket> packets() {

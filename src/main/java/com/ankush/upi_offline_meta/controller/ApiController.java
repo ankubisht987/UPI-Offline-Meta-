@@ -101,4 +101,13 @@ public class ApiController {
         return mesh.snapshot();
     }
 
+    @PostMapping("/mesh/rotate-bridge")
+    public Map<String, Object> rotateBridge() {
+        mesh.rotateBridge();
+        return Map.of(
+                "message", "Bridge moved",
+                "currentBridge", mesh.getCurrentBridgeId(),
+                "mesh", mesh.snapshot());
+    }
+
 }

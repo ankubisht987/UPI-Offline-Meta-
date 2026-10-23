@@ -2,9 +2,11 @@ package com.ankush.upi_offline_meta.services;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Random;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -15,7 +17,10 @@ import jakarta.annotation.PostConstruct;
 
 @Service
 public class MeshSimulatorService {
+
     private final Map<String, VirtualDevice> devices = new LinkedHashMap<>();
+    private final Random random = new Random();
+    private String currentBridgeId;
 
     @Autowired
     private DemoService demo;
@@ -26,12 +31,29 @@ public class MeshSimulatorService {
     }
 
     public void resetMesh() {
-        devices.clear();
-        devices.put("phone-ankush", new VirtualDevice("phone-ankush", false));
-        devices.put("phone-bob", new VirtualDevice("phone-bob", false));
-        devices.put("phone-carol", new VirtualDevice("phone-carol", false));
-        devices.put("phone-dave", new VirtualDevice("phone-dave", false));
-        devices.put("bridge-node", new VirtualDevice("bridge-node", true)); // the only one online
+        // First time: create all devices with no bridge set
+        if (devices.isEmpty()) {
+            List<String> ids = Arrays.asList("phone-ankush", "phone-bob", "phone-carol", "phone-dave", "bridge-node");
+            for (String id : ids) {
+                devices.put(id, new VirtualDevice(id, false));
+            }
+        }
+        rotateBridge();
+    }
+
+    public void rotateBridge() {
+        List<String> ids = new ArrayList<>(devices.keySet());
+        String newBridge = ids.get(random.nextInt(ids.size()));
+        this.currentBridgeId = newBridge;
+
+        // Flip: only newBridge gets internet, everyone else false
+        for (Map.Entry<String, VirtualDevice> e : devices.entrySet()) {
+            e.getValue().setHasInternet(e.getKey().equals(newBridge));
+        }
+    }
+
+    public String getCurrentBridgeId() {
+        return currentBridgeId;
     }
 
     public MeshPacket inject(String deviceId, String senderVpa, String receiverVpa,
