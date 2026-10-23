@@ -39,4 +39,8 @@ public class VirtualDevice {
     public int size() {
         return inbox.size();
     }
+
+    public void clear() {
+        inbox.clear();
+    }
 }

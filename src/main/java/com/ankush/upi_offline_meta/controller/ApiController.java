@@ -1,17 +1,28 @@
 package com.ankush.upi_offline_meta.controller;
 
 import java.math.BigDecimal;
+import java.util.List;
 import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.ankush.upi_offline_meta.crypto.ServerKeyHolder;
+import com.ankush.upi_offline_meta.model.Account;
+import com.ankush.upi_offline_meta.model.AccountRepository;
 import com.ankush.upi_offline_meta.model.MeshPacket;
+import com.ankush.upi_offline_meta.model.Transaction;
+import com.ankush.upi_offline_meta.model.TransactionRepository;
+import com.ankush.upi_offline_meta.services.BridgeIngestionService;
+import com.ankush.upi_offline_meta.services.FlushResult;
+import com.ankush.upi_offline_meta.services.IngestResult;
+import com.ankush.upi_offline_meta.services.MeshFlushService;
+import com.ankush.upi_offline_meta.services.FlushResult;
 import com.ankush.upi_offline_meta.services.MeshSimulatorService;
 
 @RestController
@@ -22,6 +33,14 @@ public class ApiController {
     private ServerKeyHolder serverKey;
     @Autowired
     private MeshSimulatorService mesh;
+    @Autowired
+    private BridgeIngestionService ingestion;
+    @Autowired
+    private MeshFlushService flusher;
+    @Autowired
+    private AccountRepository accounts;
+    @Autowired
+    private TransactionRepository transactions;
 
     @GetMapping("/server-key")
     public Map<String, String> getServerPublicKey() {
@@ -51,6 +70,34 @@ public class ApiController {
 
     @GetMapping("/mesh/state")
     public Map<String, Object> meshState() {
+        return mesh.snapshot();
+    }
+
+    @PostMapping("/bridge/ingest")
+    public IngestResult ingest(@RequestBody MeshPacket packet,
+            @RequestParam(defaultValue = "bridge-node") String bridgeNodeId,
+            @RequestParam(defaultValue = "0") int hopCount) {
+        return ingestion.ingest(packet, bridgeNodeId, hopCount);
+    }
+
+    @PostMapping("/mesh/flush")
+    public FlushResult flush(@RequestParam(defaultValue = "5") int initialTtl) {
+        return flusher.flush(initialTtl);
+    }
+
+    @GetMapping("/accounts")
+    public List<Account> accounts() {
+        return accounts.findAll();
+    }
+
+    @GetMapping("/transactions")
+    public List<Transaction> recentTransactions() {
+        return transactions.findTop20ByOrderByIdDesc();
+    }
+
+    @PostMapping("/mesh/reset")
+    public Map<String, Object> resetMesh() {
+        mesh.resetMesh();
         return mesh.snapshot();
     }
 

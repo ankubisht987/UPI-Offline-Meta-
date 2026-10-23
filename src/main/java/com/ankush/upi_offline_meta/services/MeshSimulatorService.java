@@ -89,4 +89,15 @@ public class MeshSimulatorService {
                 .forEach(d -> out.addAll(d.packets()));
         return out;
     }
+
+    public int clearBridge() {
+        int cleared = 0;
+        for (VirtualDevice d : devices.values()) {
+            if (d.hasInternet()) {
+                cleared += d.size();
+                d.clear();
+            }
+        }
+        return cleared;
+    }
 }

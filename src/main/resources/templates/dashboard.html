@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>UPI Offline Mesh — Dashboard</title>
+<style>
+  :root { --bg:#0f172a; --card:#1e293b; --line:#334155; --txt:#e2e8f0;
+          --muted:#94a3b8; --green:#22c55e; --red:#ef4444; --blue:#38bdf8; }
+  * { box-sizing: border-box; }
+  body { margin:0; padding:24px; background:var(--bg); color:var(--txt);
+         font-family: system-ui, -apple-system, Segoe UI, sans-serif; }
+  h1 { margin:0 0 4px; font-size:24px; }
+  .sub { color:var(--muted); margin-bottom:20px; font-size:14px; }
+  .grid { display:grid; grid-template-columns: repeat(auto-fit, minmax(340px,1fr));
+          gap:16px; }
+  .card { background:var(--card); border:1px solid var(--line); border-radius:12px;
+          padding:16px; }
+  .card h2 { margin:0 0 12px; font-size:15px; text-transform:uppercase;
+             letter-spacing:.08em; color:var(--blue); }
+  label { display:block; font-size:13px; color:var(--muted); margin:8px 0 4px; }
+  select, input { width:100%; padding:8px; border-radius:8px;
+                  border:1px solid var(--line); background:#0b1220; color:var(--txt); }
+  button { margin:6px 6px 0 0; padding:9px 14px; border:0; border-radius:8px;
+           background:var(--blue); color:#001; font-weight:600; cursor:pointer; }
+  button.alt { background:#475569; color:var(--txt); }
+  button.go { background:var(--green); }
+  table { width:100%; border-collapse:collapse; font-size:13px; }
+  th, td { text-align:left; padding:6px 8px; border-bottom:1px solid var(--line); }
+  th { color:var(--muted); font-weight:500; }
+  tr.ok td:last-child { color:var(--green); }
+  tr.bad td:last-child { color:var(--red); }
+  .mesh { display:flex; flex-wrap:wrap; gap:8px; }
+  .device { flex:1 1 90px; text-align:center; padding:10px 6px; border-radius:10px;
+            border:1px solid var(--line); background:#0b1220; font-size:12px; }
+  .device.online { border-color:var(--green); }
+  .device b { display:block; font-size:12px; margin-bottom:4px; }
+  .count { font-size:20px; font-weight:700; color:var(--blue); }
+  #log { margin-top:16px; max-height:160px; overflow:auto; background:#0b1220;
+         border:1px solid var(--line); border-radius:10px; padding:10px;
+         font-size:12px; color:var(--muted); white-space:pre-wrap; }
+</style>
+</head>
+<body>
+
+<h1>UPI Offline Mesh</h1>
+<div class="sub">Payments travel phone-to-phone with no internet. The bridge phone uploads them when it gets signal.</div>
+
+<div class="grid">
+
+  <section class="card">
+    <h2>Send Payment</h2>
+    <label>From</label><select id="sender"></select>
+    <label>To</label><select id="receiver"></select>
+    <label>Amount</label><input id="amount" value="100">
+    <label>TTL (hops)</label><input id="ttl" value="5">
+    <button onclick="sendPayment()">Send offline</button>
+    <button class="alt" onclick="gossip()">Gossip once</button>
+    <button class="alt" onclick="flush()">Flush to server</button>
+    <button class="alt" onclick="resetMesh()">Reset mesh</button>
+    <button class="go" onclick="runDemo()">▶ Run full demo</button>
+  </section>
+
+  <section class="card">
+    <h2>Accounts</h2>
+    <table id="accounts"></table>
+  </section>
+
+  <section class="card">
+    <h2>Mesh</h2>
+    <div id="mesh" class="mesh"></div>
+  </section>
+
+  <section class="card">
+    <h2>Recent Transactions</h2>
+    <table id="transactions"></table>
+  </section>
+</div>
+
+<pre id="log"></pre>
+
+<script>
+const $ = id => document.getElementById(id);
+
+function log(msg) {
+  $('log').textContent = new Date().toLocaleTimeString() + ' — ' + msg + '\n' + $('log').textContent;
+}
+
+async function getJson(url) {
+  const r = await fetch(url);
+  if (!r.ok) throw new Error(url + ' -> ' + r.status);
+  return r.json();
+}
+async function postJson(url) {
+  const r = await fetch(url, { method: 'POST' });
+  if (!r.ok) throw new Error(url + ' -> ' + r.status);
+  return r.json();
+}
+
+function fillSelect(sel, accounts, current) {
+  sel.innerHTML = accounts
+    .map(a => `<option value="${a.vpa}">${a.vpa} (₹${a.balance})</option>`)
+    .join('');
+  if (current && accounts.some(a => a.vpa === current)) sel.value = current;
+}
+
+async function refresh() {
+  try {
+    const [accounts, mesh, txs] = await Promise.all([
+      getJson('/api/accounts'),
+      getJson('/api/mesh/state'),
+      getJson('/api/transactions')
+    ]);
+
+    fillSelect($('sender'),   accounts, $('sender').value   || 'ankush@bank');
+    fillSelect($('receiver'), accounts, $('receiver').value || 'bob@bank');
+
+    $('accounts').innerHTML =
+      '<tr><th>VPA</th><th>Name</th><th>Balance</th></tr>' +
+      accounts.map(a =>
+        `<tr><td>${a.vpa}</td><td>${a.holderName}</td><td>₹${a.balance}</td></tr>`
+      ).join('');
+
+    $('mesh').innerHTML = Object.entries(mesh).map(([id, d]) =>
+      `<div class="device ${d.hasInternet ? 'online' : ''}">
+         <b>${id}</b>${d.hasInternet ? '🌐 online' : '📴 offline'}
+         <div class="count">${d.packetCount}</div>packet(s)
+       </div>`).join('');
+
+    $('transactions').innerHTML =
+      '<tr><th>ID</th><th>From</th><th>To</th><th>Amount</th><th>Status</th><th>Hops</th></tr>' +
+      (txs.length ? txs.map(t =>
+        `<tr class="${t.status === 'SETTLED' ? 'ok' : 'bad'}">
+           <td>${t.id}</td><td>${t.senderVpa}</td><td>${t.receiverVpa}</td>
+           <td>₹${t.amount}</td><td>${t.status}</td><td>${t.hopCount}</td>
+         </tr>`).join('')
+        : '<tr><td colspan="6" style="color:#94a3b8">No transactions yet</td></tr>');
+  } catch (e) {
+    log('refresh failed: ' + e.message);
+  }
+}
+
+async function sendPayment() {
+  const q = new URLSearchParams({
+    sender: $('sender').value, receiver: $('receiver').value,
+    amount: $('amount').value, ttl: $('ttl').value
+  });
+  try {
+    const r = await postJson('/api/demo/send?' + q);
+    log('sent packet ' + r.packetId.slice(0, 8) + '… (ttl ' + r.ttl + ')');
+  } catch (e) { log('send failed: ' + e.message); }
+  refresh();
+}
+
+async function gossip() {
+  try {
+    const r = await postJson('/api/mesh/gossip');
+    log('gossip: ' + r.transfers + ' transfer(s)');
+  } catch (e) { log('gossip failed: ' + e.message); }
+  refresh();
+}
+
+async function flush() {
+  try {
+    const r = await postJson('/api/mesh/flush');
+    log(`flush: collected ${r.collected}, settled ${r.settled}, ` +
+        `rejected ${r.rejected}, duplicates ${r.duplicates}, invalid ${r.invalid}`);
+  } catch (e) { log('flush failed: ' + e.message); }
+  refresh();
+}
+
+async function resetMesh() {
+  try { await postJson('/api/mesh/reset'); log('mesh reset'); }
+  catch (e) { log('reset failed: ' + e.message); }
+  refresh();
+}
+
+async function runDemo() {
+  log('▶ running full demo…');
+  await resetMesh();
+  await sendPayment();
+  await gossip();
+  await flush();
+  log('✔ demo complete');
+}
+
+refresh();
+setInterval(refresh, 3000);   // live updates
+</script>
+</body>
+</html>
