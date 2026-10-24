@@ -31,10 +31,9 @@ public class MeshSimulatorService {
     }
 
     public void resetMesh() {
-        // First time: create all devices with no bridge set
         devices.clear();
-        List<String> ids = Arrays.asList("phone-Rahul", "phone-Anuj", "phone-Himanshu", "phone-Satyam",
-                "phone-Parvesh");
+        List<String> ids = Arrays.asList("phone-ankush", "phone-aniket", "phone-shishir", "phone-rahul",
+                "phone-parvesh");
         for (String id : ids) {
             devices.put(id, new VirtualDevice(id, false));
         }
@@ -56,10 +55,14 @@ public class MeshSimulatorService {
         return currentBridgeId;
     }
 
-    public MeshPacket inject(String deviceId, String senderVpa, String receiverVpa,
+    public MeshPacket inject(String senderVpa, String receiverVpa,
             BigDecimal amount, String pin, int ttl) throws Exception {
+        String deviceId = demo.getDeviceId(senderVpa);
         MeshPacket packet = demo.createPacket(senderVpa, receiverVpa, amount, pin, ttl);
-        VirtualDevice device = devices.computeIfAbsent(deviceId, id -> new VirtualDevice(id, false));
+        VirtualDevice device = devices.get(deviceId);
+        if (device == null) {
+            throw new IllegalArgumentException("Unknown device for sender: " + senderVpa);
+        }
         device.receive(packet);
         return packet;
     }

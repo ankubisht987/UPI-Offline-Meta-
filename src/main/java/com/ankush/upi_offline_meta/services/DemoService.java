@@ -2,6 +2,7 @@ package com.ankush.upi_offline_meta.services;
 
 import java.math.BigDecimal;
 import java.time.Instant;
+import java.util.Map;
 import java.util.UUID;
 import java.security.MessageDigest;
 
@@ -31,13 +32,23 @@ public class DemoService {
     @Autowired
     private ServerKeyHolder serverkey;
 
+    private static final Map<String, String> VPA_TO_DEVICE = Map.of(
+            "ankush@sbi", "phone-ankush",
+            "Rahul@hdfc", "phone-rahul",
+            "aniket@pnb", "phone-aniket",
+            "Shishir@sbi", "phone-shishir");
+
+    public String getDeviceId(String vpa) {
+        return VPA_TO_DEVICE.getOrDefault(vpa, "phone-" + vpa.split("@")[0]);
+    }
+
     @PostConstruct
     public void seedAccounts() {
         if (account.count() == 0) {
             account.save(new Account("ankush@sbi", "Ankush", new BigDecimal("5000.00")));
             account.save(new Account("sahil@hdfc", "Sahil", new BigDecimal("2500.00")));
             account.save(new Account("aniket@pnb", "Aniket", new BigDecimal("2500.00")));
-            account.save(new Account("Shishir@sbi", "Shishir", new BigDecimal("5000.00")));
+            account.save(new Account("shishir@sbi", "Shishir", new BigDecimal("5000.00")));
             log.info("Seeded 4 demo accounts");
         }
     }

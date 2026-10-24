@@ -128,8 +128,7 @@ class UpiOfflineMetaApplicationTests {
     @Test
     void packetSpreadsAcrossMesh() throws Exception {
         mesh.resetMesh();
-        mesh.inject("phone-ankush", "ankush@sbi", "sahil@hdfc",
-                new BigDecimal("100.00"), "1234", 5);
+        mesh.inject("ankush@sbi", "sahil@hdfc", new BigDecimal("100.00"), "1234", 5);
         mesh.gossipOnce();
         assertEquals(5, mesh.snapshot().size());
     }
@@ -339,8 +338,7 @@ class UpiOfflineMetaApplicationTests {
         b.setBalance(new BigDecimal("1000.00"));
         accountRepo.save(b);
 
-        mesh.inject("phone-ankush", "ankush@sbi", "sahil@hdfc",
-                new BigDecimal("100.00"), "1234", 5);
+        mesh.inject("ankush@sbi", "sahil@hdfc", new BigDecimal("100.00"), "1234", 5);
         mesh.gossipOnce(); // bridge now holds it
 
         FlushResult r = flusher.flush(5);
@@ -360,8 +358,7 @@ class UpiOfflineMetaApplicationTests {
         a.setBalance(new BigDecimal("5000.00"));
         accountRepo.save(a);
 
-        mesh.inject("phone-ankush", "ankush@sbi", "sahil@hdfc",
-                new BigDecimal("100.00"), "1234", 5);
+        mesh.inject("ankush@sbi", "sahil@hdfc", new BigDecimal("100.00"), "1234", 5);
         mesh.gossipOnce();
 
         assertEquals(1, flusher.flush(5).settled());

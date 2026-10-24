@@ -50,14 +50,12 @@ public class ApiController {
 
     @PostMapping("/demo/send")
     public Map<String, Object> demoSend(
-            @RequestParam(defaultValue = "phone-ankush") String fromDevice,
             @RequestParam String sender,
             @RequestParam String receiver,
             @RequestParam String amount,
             @RequestParam(defaultValue = "1234") String pin,
             @RequestParam(defaultValue = "5") int ttl) throws Exception {
-        MeshPacket p = mesh.inject(fromDevice, sender, receiver,
-                new BigDecimal(amount), pin, ttl);
+        MeshPacket p = mesh.inject(sender, receiver, new BigDecimal(amount), pin, ttl);
         return Map.of("packetId", p.getPacketId(), "ttl", p.getTtl(),
                 "ciphertextLength", p.getCiphertext().length());
     }
