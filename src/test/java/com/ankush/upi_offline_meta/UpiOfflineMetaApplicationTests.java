@@ -75,8 +75,8 @@
 // new BigDecimal("123.45"), // amount
 // "nonce-1", // nonce
 // "abc", // pinHash
-// "bob@bank", // receiverVpa
-// "ankush@bank", // senderVpa
+// "sahil@hdfc", // receiverVpa
+// "ankush@sbi", // senderVpa
 // System.currentTimeMillis() // signedAt
 // );
 
@@ -93,7 +93,7 @@
 // void tamperedCiphertextFails() throws Exception {
 // PaymentInstruction original = new PaymentInstruction(
 // new BigDecimal("50.00"), "nonce-2", "abc",
-// "bob@bank", "ankush@bank", System.currentTimeMillis());
+// "sahil@hdfc", "ankush@sbi", System.currentTimeMillis());
 
 // String ct = crypto.encrypt(original, serverKey.getPublicKey());
 
@@ -113,22 +113,22 @@
 
 // // build a packet like the sender's phone would
 // MeshPacket packet = demo.createPacket(
-// "ankush@bank", "bob@bank", new BigDecimal("100.00"), "1234", 5);
+// "ankush@sbi", "sahil@hdfc", new BigDecimal("100.00"), "1234", 5);
 
 // assertNotNull(packet.getPacketId());
 // assertNotNull(packet.getCiphertext());
 
 // // unlock it to prove it really holds the right payment
 // PaymentInstruction inside = crypto.decrypt(packet.getCiphertext());
-// assertEquals("ankush@bank", inside.getSenderVpa());
-// assertEquals("bob@bank", inside.getReceiverVpa());
+// assertEquals("ankush@sbi", inside.getSenderVpa());
+// assertEquals("sahil@hdfc", inside.getReceiverVpa());
 // assertEquals(0, new BigDecimal("100.00").compareTo(inside.getAmount()));
 // }
 
 // @Test
 // void packetSpreadsAcrossMesh() throws Exception {
 // mesh.resetMesh();
-// mesh.inject("phone-ankush", "ankush@bank", "bob@bank",
+// mesh.inject("phone-ankush", "ankush@sbi", "sahil@hdfc",
 // new BigDecimal("100.00"), "1234", 5);
 // mesh.gossipOnce();
 // assertEquals(5, mesh.snapshot().size());
@@ -161,7 +161,7 @@
 // idem.clear();
 
 // MeshPacket packet = demo.createPacket(
-// "ankush@bank", "bob@bank", new BigDecimal("100.00"), "1234", 5);
+// "ankush@sbi", "sahil@hdfc", new BigDecimal("100.00"), "1234", 5);
 // String hash = crypto.hashCiphertext(packet.getCiphertext());
 
 // assertTrue(idem.claim(hash), "first delivery should be accepted");
@@ -172,36 +172,36 @@
 // @Test
 // void settlesPaymentAndMovesMoney() {
 // // pin known starting balances (other tests may have changed them)
-// var a = accountRepo.findById("ankush@bank").orElseThrow();
+// var a = accountRepo.findById("ankush@sbi").orElseThrow();
 // a.setBalance(new BigDecimal("5000.00"));
 // accountRepo.save(a);
-// var b = accountRepo.findById("bob@bank").orElseThrow();
+// var b = accountRepo.findById("sahil@hdfc").orElseThrow();
 // b.setBalance(new BigDecimal("1000.00"));
 // accountRepo.save(b);
 
 // PaymentInstruction ins = new PaymentInstruction(
 // new BigDecimal("100.00"), "nonce-s1", "abc",
-// "bob@bank", "ankush@bank", Instant.now().toEpochMilli());
+// "sahil@hdfc", "ankush@sbi", Instant.now().toEpochMilli());
 
 // Transaction tx = settlement.settle(ins, UUID.randomUUID().toString(),
 // "bridge-node", 2);
 
 // assertEquals(Transaction.Status.SETTLED, tx.getStatus());
 // assertEquals(0, new BigDecimal("4900.00")
-// .compareTo(accountRepo.findById("ankush@bank").orElseThrow().getBalance()));
+// .compareTo(accountRepo.findById("ankush@sbi").orElseThrow().getBalance()));
 // assertEquals(0, new BigDecimal("1100.00")
-// .compareTo(accountRepo.findById("bob@bank").orElseThrow().getBalance()));
+// .compareTo(accountRepo.findById("sahil@hdfc").orElseThrow().getBalance()));
 // }
 
 // @Test
 // void rejectsWhenInsufficientFunds() {
-// var d = accountRepo.findById("dave@bank").orElseThrow();
+// var d = accountRepo.findById("sahil@hdfc").orElseThrow();
 // d.setBalance(new BigDecimal("500.00"));
 // accountRepo.save(d);
 
 // PaymentInstruction ins = new PaymentInstruction(
 // new BigDecimal("9999.00"), "nonce-s2", "abc",
-// "bob@bank", "dave@bank", Instant.now().toEpochMilli());
+// "sahil@hdfc", "sahil@hdfc", Instant.now().toEpochMilli());
 
 // Transaction tx = settlement.settle(ins, UUID.randomUUID().toString(),
 // "bridge-node", 1);
@@ -209,28 +209,28 @@
 // assertEquals(Transaction.Status.REJECTED, tx.getStatus());
 // // dave's money must be untouched
 // assertEquals(0, new BigDecimal("500.00")
-// .compareTo(accountRepo.findById("dave@bank").orElseThrow().getBalance()));
+// .compareTo(accountRepo.findById("sahil@hdfc").orElseThrow().getBalance()));
 // }
 
 // @Test
 // void settlingSamePacketTwiceMovesMoneyOnce() {
-// var a = accountRepo.findById("ankush@bank").orElseThrow();
+// var a = accountRepo.findById("ankush@sbi").orElseThrow();
 // a.setBalance(new BigDecimal("5000.00"));
 // accountRepo.save(a);
-// var b = accountRepo.findById("bob@bank").orElseThrow();
+// var b = accountRepo.findById("sahil@hdfc").orElseThrow();
 // b.setBalance(new BigDecimal("1000.00"));
 // accountRepo.save(b);
 
 // PaymentInstruction ins = new PaymentInstruction(
 // new BigDecimal("100.00"), "nonce-s3", "abc",
-// "bob@bank", "ankush@bank", Instant.now().toEpochMilli());
+// "sahil@hdfc", "ankush@sbi", Instant.now().toEpochMilli());
 // String hash = UUID.randomUUID().toString();
 
 // settlement.settle(ins, hash, "bridge-node", 2);
 // settlement.settle(ins, hash, "bridge-node", 2); // duplicate!
 
 // assertEquals(0, new BigDecimal("4900.00")
-// .compareTo(accountRepo.findById("ankush@bank").orElseThrow().getBalance()),
+// .compareTo(accountRepo.findById("ankush@sbi").orElseThrow().getBalance()),
 // "money must move exactly once");
 // }
 
@@ -238,7 +238,7 @@
 // void rejectsNegativeAmount() {
 // PaymentInstruction ins = new PaymentInstruction(
 // new BigDecimal("-100.00"), "nonce-neg", "abc",
-// "bob@bank", "ankush@bank", Instant.now().toEpochMilli());
+// "sahil@hdfc", "ankush@sbi", Instant.now().toEpochMilli());
 
 // Transaction tx = settlement.settle(ins, UUID.randomUUID().toString(),
 // "bridge-node", 1);
@@ -249,14 +249,14 @@
 // @Test
 // void validPacketIsSettled() throws Exception {
 // idem.clear();
-// var a = accountRepo.findById("ankush@bank").orElseThrow();
+// var a = accountRepo.findById("ankush@sbi").orElseThrow();
 // a.setBalance(new BigDecimal("5000.00"));
 // accountRepo.save(a);
-// var b = accountRepo.findById("bob@bank").orElseThrow();
+// var b = accountRepo.findById("sahil@hdfc").orElseThrow();
 // b.setBalance(new BigDecimal("1000.00"));
 // accountRepo.save(b);
 
-// MeshPacket p = demo.createPacket("ankush@bank", "bob@bank",
+// MeshPacket p = demo.createPacket("ankush@sbi", "sahil@hdfc",
 // new BigDecimal("100.00"), "1234", 5);
 
 // IngestResult r = ingestion.ingest(p, "bridge-node", 2);
@@ -264,17 +264,17 @@
 // assertEquals("SETTLED", r.outcome());
 // assertNotNull(r.transactionId());
 // assertEquals(0, new BigDecimal("4900.00")
-// .compareTo(accountRepo.findById("ankush@bank").orElseThrow().getBalance()));
+// .compareTo(accountRepo.findById("ankush@sbi").orElseThrow().getBalance()));
 // }
 
 // @Test
 // void duplicateUploadIsDropped() throws Exception {
 // idem.clear();
-// var a = accountRepo.findById("ankush@bank").orElseThrow();
+// var a = accountRepo.findById("ankush@sbi").orElseThrow();
 // a.setBalance(new BigDecimal("5000.00"));
 // accountRepo.save(a);
 
-// MeshPacket p = demo.createPacket("ankush@bank", "bob@bank",
+// MeshPacket p = demo.createPacket("ankush@sbi", "sahil@hdfc",
 // new BigDecimal("100.00"), "1234", 5);
 
 // assertEquals("SETTLED", ingestion.ingest(p, "bridge-node", 1).outcome());
@@ -287,7 +287,7 @@
 // idem.clear();
 
 // PaymentInstruction old = new PaymentInstruction(
-// new BigDecimal("10.00"), "nonce-old", "abc", "bob@bank", "ankush@bank",
+// new BigDecimal("10.00"), "nonce-old", "abc", "sahil@hdfc", "ankush@sbi",
 // System.currentTimeMillis() - Duration.ofDays(2).toMillis()); // 2 days old
 
 // MeshPacket p = new MeshPacket();
@@ -303,7 +303,7 @@
 // void tamperedPacketIsInvalid() throws Exception {
 // idem.clear();
 
-// MeshPacket p = demo.createPacket("ankush@bank", "bob@bank",
+// MeshPacket p = demo.createPacket("ankush@sbi", "sahil@hdfc",
 // new BigDecimal("100.00"), "1234", 5);
 
 // // flip one character of the ciphertext
@@ -317,11 +317,11 @@
 // @Test
 // void insufficientFundsIsRejected() throws Exception {
 // idem.clear();
-// var d = accountRepo.findById("dave@bank").orElseThrow();
+// var d = accountRepo.findById("ankush@sbi").orElseThrow();
 // d.setBalance(new BigDecimal("10.00"));
 // accountRepo.save(d);
 
-// MeshPacket p = demo.createPacket("dave@bank", "bob@bank",
+// MeshPacket p = demo.createPacket("ankush@sbi", "sahil@hdfc",
 // new BigDecimal("9999.00"), "1234", 5);
 
 // assertEquals("REJECTED", ingestion.ingest(p, "bridge-node", 1).outcome());
@@ -332,14 +332,14 @@
 // idem.clear();
 // mesh.resetMesh();
 
-// var a = accountRepo.findById("ankush@bank").orElseThrow();
+// var a = accountRepo.findById("ankush@sbi").orElseThrow();
 // a.setBalance(new BigDecimal("5000.00"));
 // accountRepo.save(a);
-// var b = accountRepo.findById("bob@bank").orElseThrow();
+// var b = accountRepo.findById("sahil@hdfc").orElseThrow();
 // b.setBalance(new BigDecimal("1000.00"));
 // accountRepo.save(b);
 
-// mesh.inject("phone-ankush", "ankush@bank", "bob@bank",
+// mesh.inject("phone-ankush", "ankush@sbi", "sahil@hdfc",
 // new BigDecimal("100.00"), "1234", 5);
 // mesh.gossipOnce(); // bridge now holds it
 
@@ -348,7 +348,7 @@
 // assertEquals(1, r.collected());
 // assertEquals(1, r.settled());
 // assertEquals(0, new BigDecimal("4900.00")
-// .compareTo(accountRepo.findById("ankush@bank").orElseThrow().getBalance()));
+// .compareTo(accountRepo.findById("ankush@sbi").orElseThrow().getBalance()));
 // }
 
 // @Test
@@ -356,11 +356,11 @@
 // idem.clear();
 // mesh.resetMesh();
 
-// var a = accountRepo.findById("ankush@bank").orElseThrow();
+// var a = accountRepo.findById("ankush@sbi").orElseThrow();
 // a.setBalance(new BigDecimal("5000.00"));
 // accountRepo.save(a);
 
-// mesh.inject("phone-ankush", "ankush@bank", "bob@bank",
+// mesh.inject("phone-ankush", "ankush@sbi", "sahil@hdfc",
 // new BigDecimal("100.00"), "1234", 5);
 // mesh.gossipOnce();
 
@@ -376,19 +376,19 @@
 // assertEquals(0, second.settled());
 // // money unchanged
 // assertEquals(0, new BigDecimal("4900.00")
-// .compareTo(accountRepo.findById("ankush@bank").orElseThrow().getBalance()));
+// .compareTo(accountRepo.findById("ankush@sbi").orElseThrow().getBalance()));
 // }
 
 // @Test
 // void databaseGuardPreventsDoubleSettleAfterMemoryWipe() throws Exception {
 // idem.clear();
 
-// var ankush = accountRepo.findById("ankush@bank").orElseThrow();
+// var ankush = accountRepo.findById("ankush@sbi").orElseThrow();
 // ankush.setBalance(new BigDecimal("5000.00"));
 // accountRepo.save(ankush);
 
 // MeshPacket packet = demo.createPacket(
-// "ankush@bank", "bob@bank", new BigDecimal("100.00"), "1234", 5);
+// "ankush@sbi", "sahil@hdfc", new BigDecimal("100.00"), "1234", 5);
 
 // assertEquals("SETTLED", ingestion.ingest(packet, "bridge-node",
 // 1).outcome());
@@ -399,7 +399,7 @@
 // ingestion.ingest(packet, "bridge-node", 1);
 
 // assertEquals(0, new BigDecimal("4900.00").compareTo(
-// accountRepo.findById("ankush@bank").orElseThrow().getBalance()),
+// accountRepo.findById("ankush@sbi").orElseThrow().getBalance()),
 // "money must not move a second time");
 // }
 
@@ -407,15 +407,15 @@
 // void simultaneousDeliveriesSettleExactlyOnce() throws Exception {
 // idem.clear();
 
-// var ankush = accountRepo.findById("ankush@bank").orElseThrow();
+// var ankush = accountRepo.findById("ankush@sbi").orElseThrow();
 // ankush.setBalance(new BigDecimal("5000.00"));
 // accountRepo.save(ankush);
 
-// var bob = accountRepo.findById("bob@bank").orElseThrow();
+// var bob = accountRepo.findById("sahil@hdfc").orElseThrow();
 // bob.setBalance(new BigDecimal("1000.00"));
 // accountRepo.save(bob);
 
-// MeshPacket packet = demo.createPacket("ankush@bank", "bob@bank", new
+// MeshPacket packet = demo.createPacket("ankush@sbi", "sahil@hdfc", new
 // BigDecimal("100.00"), "1234", 5);
 
 // int N = 25;
@@ -445,8 +445,8 @@
 // "all others must be duplicates");
 
 // assertEquals(0, new BigDecimal("4900.00")
-// .compareTo(accountRepo.findById("ankush@bank").orElseThrow().getBalance()));
+// .compareTo(accountRepo.findById("ankush@sbi").orElseThrow().getBalance()));
 // assertEquals(0, new BigDecimal("1100.00")
-// .compareTo(accountRepo.findById("bob@bank").orElseThrow().getBalance()));
+// .compareTo(accountRepo.findById("sahil@hdfc").orElseThrow().getBalance()));
 // }
 // }
