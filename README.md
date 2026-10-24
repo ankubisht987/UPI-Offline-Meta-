@@ -323,7 +323,7 @@ Run the entire test suite:
 The easiest way to see everything in action.
 
 1. Start the app
-2. Open [http://localhost:1010/](http://localhost:----)
+2. Open localhost:// 
 3. **"▶ Run full demo"**
 
 This will automatically:
