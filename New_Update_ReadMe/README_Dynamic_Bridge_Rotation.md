@@ -133,7 +133,7 @@ Invoke-RestMethod "http://localhost:1010/api/mesh/state" | ConvertTo-Json -Depth
 
 ### Full flow after rotation
 
-1. `POST /api/demo/send?sender=ankush@bank&receiver=bob@bank&amount=100&ttl=5`
+1. `POST /api/demo/send?sender=ankush@bank&receiver=sahil@hdfc&amount=100&ttl=5`
 2. `POST /api/mesh/gossip` (repeat until packet reaches current bridge)
 3. `POST /api/mesh/rotate-bridge` (simulate signal moving)
 4. `POST /api/mesh/gossip` (spread towards new bridge)

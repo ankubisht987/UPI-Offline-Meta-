@@ -49,11 +49,11 @@
 // ankush.setBalance(new BigDecimal("5000.00"));
 // accounts.save(ankush);
 
-// var bob = accounts.findById("bob@bank").orElseThrow();
+// var bob = accounts.findById("sahil@hdfc").orElseThrow();
 // bob.setBalance(new BigDecimal("1000.00"));
 // accounts.save(bob);
 
-// MeshPacket packet = demo.createPacket("ankush@bank", "bob@bank", new
+// MeshPacket packet = demo.createPacket("ankush@bank", "sahil@hdfc", new
 // BigDecimal("100.00"), "1234", 5);
 
 // ExecutorService pool = Executors.newFixedThreadPool(DELIVERIES);
@@ -86,7 +86,7 @@
 // .compareTo(accounts.findById("ankush@bank").orElseThrow().getBalance()),
 // "sender debited exactly once");
 // assertEquals(0, new BigDecimal("1100.00")
-// .compareTo(accounts.findById("bob@bank").orElseThrow().getBalance()),
+// .compareTo(accounts.findById("sahil@hdfc").orElseThrow().getBalance()),
 // "receiver credited once");
 // }
 // }

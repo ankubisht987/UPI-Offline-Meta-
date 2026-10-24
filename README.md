@@ -278,7 +278,7 @@ server.port=1010
 spring.jpa.hibernate.ddl-auto=update
 ```
 
-> The app auto-seeds 4 demo accounts on first run: `ankush@bank`, `bob@bank`, `carol@bank`, `dave@bank`.
+> The app auto-seeds 4 demo accounts on first run: `ankush@bank`, `sahil@hdfc`, `carol@bank`, `dave@bank`.
 
 ## Running the Application
 
@@ -329,7 +329,7 @@ The easiest way to see everything in action.
 This will automatically:
 
 1. Reset the mesh
-2. Send a payment from `ankush@bank` → `bob@bank` for `₹100` from `phone-ankush`
+2. Send a payment from `ankush@bank` → `sahil@hdfc` for `₹100` from `phone-ankush`
 3. Gossip once (packet spreads to all 5 devices)
 4. Flush to server (bridge uploads → decrypt → settle)
 5. Refresh UI to show updated balances and a new `SETTLED` transaction

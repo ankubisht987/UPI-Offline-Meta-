@@ -3,20 +3,22 @@ package com.ankush.upi_offline_meta.model;
 import java.math.BigDecimal;
 
 public class PaymentInstruction {
-    
+
     private String senderVpa; // VPA of the sender (e.g., ankush@bank)
-    private String receiverVpa; // VPA of the receiver (e.g., bob@bank)
+    private String receiverVpa; // VPA of the receiver (e.g., sahil@hdfc)
     private BigDecimal amount; // Amount to be transferred, stored as String to avoid precision issues
     private String pinHash; // Hash of the sender's PIN for authentication (never store plain PIN)
     private String nonce; // Unique random string to prevent replay attacks (e.g., "abc123xyz")
-    private Long signedAt; // Timestamp (in milliseconds) when the instruction was signed by the sender (e.g., 1690000000000)
+    private Long signedAt; // Timestamp (in milliseconds) when the instruction was signed by the sender
+                           // (e.g., 1690000000000)
 
     // ============================================
     // CONSTRUCTORS
     public PaymentInstruction() {
     }
 
-    public PaymentInstruction(BigDecimal amount, String nonce, String pinHash, String receiverVpa, String senderVpa, Long signedAt) {
+    public PaymentInstruction(BigDecimal amount, String nonce, String pinHash, String receiverVpa, String senderVpa,
+            Long signedAt) {
         this.amount = amount;
         this.nonce = nonce;
         this.pinHash = pinHash;

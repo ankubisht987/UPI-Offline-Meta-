@@ -59,7 +59,8 @@ public class MeshSimulatorService {
     public MeshPacket inject(String deviceId, String senderVpa, String receiverVpa,
             BigDecimal amount, String pin, int ttl) throws Exception {
         MeshPacket packet = demo.createPacket(senderVpa, receiverVpa, amount, pin, ttl);
-        devices.get(deviceId).receive(packet);
+        VirtualDevice device = devices.computeIfAbsent(deviceId, id -> new VirtualDevice(id, false));
+        device.receive(packet);
         return packet;
     }
 
